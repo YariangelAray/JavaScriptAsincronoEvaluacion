@@ -1,0 +1,1 @@
+export { solicitarPosts } from "./solicitarPosts.js";

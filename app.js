@@ -6,9 +6,12 @@ import * as tareasMod from "./Modulos/Tareas/index.js"; //Se importa todo como u
 import * as albumsMod from "./Modulos/Albums/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
 // Importamos todo lo exportado por el modulo de Fotos para hacer uso de ello en nuestro programa 
 import * as fotosMod from "./Modulos/Fotos/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
+// Importamos todo lo exportado por el modulo de Posts para hacer uso de ello en nuestro programa 
+import * as postsMod from "./Modulos/Posts/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
+// Importamos todo lo exportado por el modulo de Comentarios para hacer uso de ello en nuestro programa 
+import * as commentMod from "./Modulos/Comentarios/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
 
-
-const usuariosTareas = async () => {
+const listarTareasUsuarios = async () => {
     try {
         const datosUsuarios = await usersMod.solicitarUsuarios();
 
@@ -21,7 +24,7 @@ const usuariosTareas = async () => {
     }
 }
 
-const usuarioAlbums = async () => {
+const listarAlbumsUsuario = async () => {
 
     let username = prompt("Ingrese el username del usuario: ");
 
@@ -47,17 +50,47 @@ const usuarioAlbums = async () => {
     }
 }
 
+const filtrarPosts = async () => {
+
+    let titulo;
+    do {
+        titulo = prompt("Ingrese una palabra, una frase del titulo o el titulo completo del post que quiera buscar:");
+        if (!titulo) alert("No ha ingresado ninguna frase.")
+        else break;        
+    } while (true);
+
+    let regex = new RegExp(titulo);
+
+    try {
+        const posts = await postsMod.solicitarPosts();    
+    
+        const postEncontrados = posts.filter((post) => regex.test(post.title));
+    
+        return await Promise.all(postEncontrados.map(async (post) => {
+            const comentarios = await commentMod.solicitarComentariosId(post.id);
+            return { ...post, comentarios };
+        }));
+
+    } catch (error) {
+        throw new Error("Ha ocurrido un error en la peticion: " + error);
+    }
+}
+
 const ejecutarPrograma = async () => {
 
     let opcion = prompt("Ingrese el número del ejercicio a dar solución o ingrese cualquier otro caracter para salir: ");
     try {
         switch (opcion) {
             case "1":
-                console.log(await usuariosTareas());
+                console.log(await listarTareasUsuarios());
                 break;
             
             case "2":
-                console.log(await usuarioAlbums());
+                console.log(await listarAlbumsUsuario());
+                break;
+
+            case "3":
+                console.log(await filtrarPosts());
                 break;
     
             default:
