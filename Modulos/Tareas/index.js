@@ -1,1 +1,1 @@
-export { solicitarTareasEstado } from "./solicitarPorIdUserEstado.js";
+export { solicitarTareasIdEstado } from "./solicitarPorIdUserEstado.js";

@@ -1,0 +1,1 @@
+export { solicitarAlbumsId } from "./solicitarPorIdUser.js";
