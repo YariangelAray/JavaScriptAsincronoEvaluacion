@@ -1,21 +1,13 @@
-// Importamos todo lo exportado por el modulo de Usuarios para hacer uso de ello en nuestro programa 
-import * as usersMod from "./Modulos/Usuarios/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
-// Importamos todo lo exportado por el modulo de Tareas para hacer uso de ello en nuestro programa 
-import * as tareasMod from "./Modulos/Tareas/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
-// Importamos todo lo exportado por el modulo de Albums para hacer uso de ello en nuestro programa 
-import * as albumsMod from "./Modulos/Albums/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
-// Importamos todo lo exportado por el modulo de Fotos para hacer uso de ello en nuestro programa 
-import * as fotosMod from "./Modulos/Fotos/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
-// Importamos todo lo exportado por el modulo de Posts para hacer uso de ello en nuestro programa 
-import * as postsMod from "./Modulos/Posts/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
-// Importamos todo lo exportado por el modulo de Comentarios para hacer uso de ello en nuestro programa 
-import * as commentMod from "./Modulos/Comentarios/index.js"; //Se importa todo como un objeto y asi no tenemos que listar una por una las funciones 
+// Importamos los módulos exportados del archivo barril para acceder a las funciones que necesitaremos
+import { usersMod, commentMod, postsMod, albumsMod, tareasMod, fotosMod } from "./Modulos/index.js";
 
+// Función para listar tareas pendientes por usuario.
 const listarTareasUsuarios = async () => {
     try {
-        const datosUsuarios = await usersMod.solicitarUsuarios();
+        const datosUsuarios = await usersMod.solicitarUsuarios(); // Se obtienen los usuarios
 
         return await Promise.all(datosUsuarios.map( async (usuario) => {
+             // Para cada usuario, se buscan sus tareas pendientes
             const tareasPendientes = await tareasMod.solicitarTareasIdEstado(usuario.id, false);
             return {...usuario, tareasPendientes};
         }))    
@@ -24,21 +16,21 @@ const listarTareasUsuarios = async () => {
     }
 }
 
+// Función para listar los álbumes y fotos de un usuario ingresado por teclado.
 const listarAlbumsUsuario = async () => {
 
-    let username = prompt("Ingrese el username del usuario: ");
+    let username = prompt("Ingrese el username del usuario: "); // Se le solicita el username al usuario
 
     try {
         const datosUsuarios = await usersMod.solicitarUsuarioPorUsername(username);    
 
         if (datosUsuarios.length === 0) return `El usuario con el username ${username} no existe.`;
-
-        const usuario = datosUsuarios[0];
-        
+        const usuario = datosUsuarios[0];        
+          // Se buscan los álbumes del usuario
         const albums = await albumsMod.solicitarAlbumsId(usuario.id);
 
         const datosAlbums = await Promise.all(albums.map(async (album) => {
-
+            // Se obtienen las fotos de cada álbum
             const fotos = await fotosMod.solicitarFotosId(album.id);    
             return { ...album, fotos }
         }));
@@ -50,6 +42,7 @@ const listarAlbumsUsuario = async () => {
     }
 }
 
+// Función para filtrar posts según el título ingresado por el usuario.
 const filtrarPosts = async () => {
 
     let titulo;
@@ -59,14 +52,16 @@ const filtrarPosts = async () => {
         else break;        
     } while (true);
 
-    let regex = new RegExp(titulo);
+    let regex = new RegExp(titulo, "i"); // Expresión regular para buscar coincidencias en el título
 
     try {
         const posts = await postsMod.solicitarPosts();    
     
+        // Se filtran los posts según el título ingresado
         const postEncontrados = posts.filter((post) => regex.test(post.title));
     
         return await Promise.all(postEncontrados.map(async (post) => {
+            //Se añaden los comentarios a cada post encontrado
             const comentarios = await commentMod.solicitarComentariosId(post.id);
             return { ...post, comentarios };
         }));
@@ -76,6 +71,7 @@ const filtrarPosts = async () => {
     }
 }
 
+// Función que obtiene solo el nombre y teléfono de cada usuario.
 const listarUsuariosContacto = async () => {
     try {
         const datosUsuarios = await usersMod.solicitarUsuarios();
@@ -107,13 +103,8 @@ export const obtenerInformacion = async () => {
                 // Para cada post, se solicitan los comentarios correspondientes a dicho post
                 const comentarios = await commentMod.solicitarComentariosId(post.id);
 
-                // Se retorna un objeto con las propiedades que indiquemos, que incluye el título, contenido del post y los comentarios correspondientes (con su nombre y contenido)
-                return {
-                titulo: post.title,
-                contenido: post.body,
-                comentarios: comentarios.map((comentario) => (
-                    {nombre: comentario.name,
-                    comentario: comentario.body}))};
+                // Se retorna un objeto con las propiedades del posts, agregando los comentarios del mismo
+                return {...post, comentarios};
             }));
 
         // Se solicitan los álbumes del usuario
@@ -125,19 +116,12 @@ export const obtenerInformacion = async () => {
             // Para cada álbum, se solicitan las fotos correspondientes
             const fotos = await fotosMod.solicitarFotosId(album.id);
 
-            // Se retorna un objeto con el título del álbum y un arreglo de las fotos con sus datos
-            return {
-            titulo: album.title,
-            fotos: fotos.map((foto) => (
-                {titulo: foto.title,
-                url: foto.url,
-                urlMiniatura: foto.thumbnailUrl}))};
+            // Se retorna un objeto con las propiedades del álbum y una nueva con el arreglo de las fotos de ese album
+            return {...album, fotos};
         }));
 
         // Se retorna un objeto que contiene la información del usuario, sus posts y álbumes
-        return {
-            id: usuario.id,
-            nombre: usuario.name,
+        return {...usuario,
             posts: datosPosts,
             albumes: datosAlbumes};        
         }));
@@ -148,35 +132,39 @@ export const obtenerInformacion = async () => {
     }
 }
 
+// Función principal que ejecuta el programa y maneja el menú interactivo.
+
 const ejecutarPrograma = async () => {
-
-    let opcion = prompt("Ingrese el número del ejercicio a dar solución o ingrese cualquier otro caracter para salir: ");
-    try {
-        switch (opcion) {
-            case "1":
-                console.log(await listarTareasUsuarios());
-                break;
-            
-            case "2":
-                console.log(await listarAlbumsUsuario());
-                break;
-
-            case "3":
-                console.log(await filtrarPosts());
-                break;
-            case "4":
-                console.log(await listarUsuariosContacto());
-                break;
-            case "5":
-                console.log( await obtenerInformacion());
-                break;
-            default:
-                alert("Terminando programa...");
-                return;
-        }                    
-    } catch (error) {
-        console.error("Error en la ejecución del programa:" + error);
+    while (true) {        
+        let opcion = prompt("Ingrese el número del ejercicio a dar solución o ingrese cualquier otro caracter para salir: ");
+        try {
+            switch (opcion) {
+                case "1":
+                    console.log(await listarTareasUsuarios());
+                    break;
+                
+                case "2":
+                    console.log(await listarAlbumsUsuario());
+                    break;
+    
+                case "3":
+                    console.log(await filtrarPosts());
+                    break;
+                case "4":
+                    console.log(await listarUsuariosContacto());
+                    break;
+                case "5":
+                    console.log( await obtenerInformacion());
+                    break;
+                default:
+                    alert("Terminando programa...");
+                    return;
+            }                    
+        } catch (error) {
+            console.error("Error en la ejecución del programa:" + error);
+        }
     }
+
 }
 
 ejecutarPrograma();
