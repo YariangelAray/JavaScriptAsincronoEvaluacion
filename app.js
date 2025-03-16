@@ -72,8 +72,20 @@ const filtrarPosts = async () => {
         }));
 
     } catch (error) {
-        throw new Error("Ha ocurrido un error en la peticion: " + error);
+        console.error("Ha ocurrido un error en la petición: " + error);
     }
+}
+
+const listarUsuariosContacto = async () => {
+    try {
+        const datosUsuarios = await usersMod.solicitarUsuarios();
+
+        return datosUsuarios.map((usuario) => {
+          return {nombre: usuario.name, telefono: usuario.phone}
+        });
+      } catch (error) {
+        console.error("Ha ocurrido un error en la petición: " + error);
+      }
 }
 
 const ejecutarPrograma = async () => {
@@ -92,6 +104,8 @@ const ejecutarPrograma = async () => {
             case "3":
                 console.log(await filtrarPosts());
                 break;
+            case "4":
+                console.log(await listarUsuariosContacto());
     
             default:
                 alert("Terminando programa...");
