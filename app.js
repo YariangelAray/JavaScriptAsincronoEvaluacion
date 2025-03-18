@@ -178,23 +178,29 @@ const ejecutarPrograma = async () => {
     while (true) {        
         // Se solicita al usuario que ingrese una opción
         let opcion = prompt("Ingrese el número del ejercicio a dar solución o ingrese cualquier otro caracter para salir: ");
+        //Bloque try..catch para manejar errores que puedan surgir durante la ejecución de la función
         try {
             switch (opcion) {
                 case "1":
+                    console.log("Listado de tareas pendiente de cada usuario:")
                     console.log(await listarTareasUsuarios());
                     break;
                 
                 case "2":
+                    console.log("Albums y fotos del usuario ingresado:")
                     console.log(await listarAlbumsUsuario());
                     break;
     
                 case "3":
+                    console.log("Posts filtrados con sus comentarios:")
                     console.log(await filtrarPosts());
                     break;
                 case "4":
+                    console.log("Usuarios con nombre y teléfono:")
                     console.log(await listarUsuariosContacto());
                     break;
                 case "5":
+                    console.log("Información completa de todos los usuarios (Posts>Comentarios - Albums>Fotos):")
                     console.log( await obtenerInformacion());
                     break;
                 default:
@@ -209,6 +215,5 @@ const ejecutarPrograma = async () => {
         }
     }
 }
-
-// Se ejecuta la función principal para iniciar el programa
+//Se ejecuta la función principal para iniciar el programa
 ejecutarPrograma();
