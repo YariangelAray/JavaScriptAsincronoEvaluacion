@@ -1,4 +1,5 @@
-import realizarPeticion from "../Helpers/realizarPeticion.js"; //Importamos la función
+import realizarPeticion from "../Helpers/realizarPeticion.js";
+//Importamos la función realizarPeticion
 
 //Función para solicitar los datos del usuarios
 export const solicitarUsuarios = async () => {
